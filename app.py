@@ -13,7 +13,7 @@ from langchain.chains import LLMChain
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-PDF_FOLDER_PATH = r"C:\Users\chnan\Desktop\demo2\publications" # Use raw string for path
+PDF_FOLDER_PATH = r"C:\Users\chnan\Desktop\demo2\publications"  # Specify the path to your folder with PDFs
 FAISS_INDEX_PATH = "faiss_index"
 
 def get_pdf_text_from_folder(folder_path):
@@ -41,6 +41,14 @@ def get_conversational_chain(template):
     prompt = PromptTemplate(template=template, input_variables=["context", "question"])
     chain = LLMChain(llm=model, prompt=prompt)
     return chain
+
+def process_pdfs():
+    if not os.path.exists(FAISS_INDEX_PATH):
+        with st.spinner("Processing PDFs..."):
+            raw_text = get_pdf_text_from_folder(PDF_FOLDER_PATH)
+            text_chunks = get_text_chunks(raw_text)
+            get_vector_store(text_chunks)
+            st.success("Processing complete and FAISS index created.")
 
 def user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
@@ -94,22 +102,12 @@ def main():
     st.set_page_config(page_title="Chat PDF")
     st.header("Chat with PDF using Gemini💁")
 
+    process_pdfs()
+
     user_question = st.text_input("Ask a Question from the PDF Files")
 
     if user_question:
         user_input(user_question)
-
-    with st.sidebar:
-        st.title("Menu:")
-        if st.button("Process PDFs from Folder"):
-            if os.path.exists(FAISS_INDEX_PATH + ".index") or os.path.exists(FAISS_INDEX_PATH + ".index"):
-                st.success("FAISS index already exists. Ready to use.")
-            else:
-                with st.spinner("Processing..."):
-                    raw_text = get_pdf_text_from_folder(PDF_FOLDER_PATH)
-                    text_chunks = get_text_chunks(raw_text)
-                    get_vector_store(text_chunks)
-                    st.success("Processing complete and FAISS index created.")
 
 if __name__ == "__main__":
     main()
