@@ -13,7 +13,7 @@ from langchain.chains import LLMChain
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-PDF_FOLDER_PATH = r"C:\Users\chnan\Desktop\demo2\publications"  # Specify the path to your folder with PDFs
+PDF_FOLDER_PATH = r"publications"  # Specify the path to your folder with PDFs
 FAISS_INDEX_PATH = "faiss_index"
 
 def get_pdf_text_from_folder(folder_path):
