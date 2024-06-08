@@ -77,7 +77,7 @@ def user_input(user_question):
 
     current_response_text = current_response.get("text", "No output text found")
 
-    st.write("Reply: ", current_response_text)
+    st.write("Reply:\n ", current_response_text)
 
     # Handling future prospects based on the same context and question
     future_question_template = """
@@ -96,7 +96,7 @@ def user_input(user_question):
 
     future_response_text = future_response.get("text", "No output text found")
 
-    st.write("Future Prospects: ", future_response_text)
+    st.write("Future Prospects: \n", future_response_text)
 
 def main():
     st.set_page_config(page_title="Chat PDF")
@@ -104,7 +104,7 @@ def main():
 
     process_pdfs()
 
-    user_question = st.text_input('''Ask a Question from the PDF Files
+    user_question = st.text_input('''Ask a Question from the PDF Files\n
     In the Format:-Summary on your topic''')
 
     if user_question:
