@@ -10,6 +10,9 @@ from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import LLMChain
 
+# Set page configuration
+st.set_page_config(page_title="Chat PDF")
+
 # Load environment variables
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -123,33 +126,4 @@ def user_input(user_question):
     """
     future_chain = get_conversational_chain(future_question_template)
 
-    future_response = future_chain(
-        {"context": context, "question": user_question},
-        return_only_outputs=True
-    )
-
-    future_response_text = future_response.get("text", "No output text found")
-
-    st.subheader("Future Prospects")
-    st.write(future_response_text)
-
-def main():
-    st.set_page_config(page_title="Chat PDF")
-    
-    # Add a header image
-    st.image("image.jpg", use_column_width=True)
-    
-    st.markdown("<div class='header'><h1>Chat with your BM Lab💁</h1></div>", unsafe_allow_html=True)
-
-    st.markdown("---")
-    
-    process_pdfs()
-
-    st.markdown("<h2>Ask a Question from the PDF Files</h2>", unsafe_allow_html=True)
-    user_question = st.text_input("Enter your question here:")
-
-    if user_question:
-        user_input(user_question)
-
-if __name__ == "__main__":
-    main()
+ 
