@@ -137,7 +137,7 @@ def main():
     st.set_page_config(page_title="Chat PDF")
     
     # Add a header image
-    st.image("C:\Users\chnan\Desktop\demo2\image.jpg", use_column_width=True)
+    st.image("image.jpg", use_column_width=True)
     
     st.markdown("<div class='header'><h1>Chat with your BM Lab💁</h1></div>", unsafe_allow_html=True)
 
