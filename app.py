@@ -10,47 +10,11 @@ from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import LLMChain
 
-# Set page configuration
-st.set_page_config(page_title="Chat PDF")
-
-# Load environment variables
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Constants
 PDF_FOLDER_PATH = r"publications"  # Specify the path to your folder with PDFs
 FAISS_INDEX_PATH = "faiss_index"
-
-# Custom CSS for better styling
-st.markdown("""
-    <style>
-        .main {
-            background-color: #f0f2f6;
-        }
-        .stButton button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-        }
-        .stButton button:hover {
-            background-color: white;
-            color: black;
-            border: 2px solid #4CAF50;
-        }
-        .header {
-            text-align: center;
-            padding: 10px;
-        }
-    </style>
-""", unsafe_allow_html=True)
 
 def get_pdf_text_from_folder(folder_path):
     text = ""
@@ -113,8 +77,7 @@ def user_input(user_question):
 
     current_response_text = current_response.get("text", "No output text found")
 
-    st.subheader("Reply")
-    st.write(current_response_text)
+    st.write("Reply: ", current_response_text)
 
     # Handling future prospects based on the same context and question
     future_question_template = """
@@ -126,4 +89,25 @@ def user_input(user_question):
     """
     future_chain = get_conversational_chain(future_question_template)
 
- 
+    future_response = future_chain(
+        {"context": context, "question": user_question},
+        return_only_outputs=True
+    )
+
+    future_response_text = future_response.get("text", "No output text found")
+
+    st.write("Future Prospects: ", future_response_text)
+
+def main():
+    st.set_page_config(page_title="Chat PDF")
+    st.header("Chat with your BM Lab💁")
+
+    process_pdfs()
+
+    user_question = st.text_input("Ask a Question from the PDF Files")
+
+    if user_question:
+        user_input(user_question)
+
+if __name__ == "__main__":
+    main()
