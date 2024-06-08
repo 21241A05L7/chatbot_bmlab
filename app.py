@@ -62,7 +62,7 @@ def user_input(user_question):
 
     # Handling current context question
     current_question_template = """
-    What research has been done on the topic asked based on the context provided\n\n
+    Based on the provided context, describe the research that has been conducted on the given topic by changing the question to your understandable way but give me th answer for sure.\n\n
     Context:\n {context}?\n
     Question: \n{question}\n
 
