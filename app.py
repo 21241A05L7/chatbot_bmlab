@@ -74,15 +74,19 @@ def user_input(user_question):
     new_db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question)
 
-    if "list" in user_question.lower() and "titles" in user_question.lower():
-        titles_text = list_paper_titles(docs)
-        st.write("Paper Titles:\n", titles_text)
-        current_response_text = titles_text
-    elif "contribution" in user_question.lower() or "work by" in user_question.lower():
+    if "contribution" in user_question.lower() or "work by" in user_question.lower():
         author_name = user_question.split("by")[-1].strip()
-        author_papers_text = list_author_papers(author_name, docs)
-        st.write(f"Papers by {author_name}:\n", author_papers_text)
-        current_response_text = author_papers_text
+        titles = []
+        for doc in docs:
+            if author_name.lower() in doc.page_content.lower():
+                title = doc.metadata.get("title", "Untitled")
+                titles.append(title)
+        if titles:
+            st.write(f"Papers by {author_name}:\n" + "\n".join(titles))
+            current_response_text = "\n".join(titles)
+        else:
+            st.write(f"No papers found by {author_name}.")
+            current_response_text = f"No papers found by {author_name}."
     else:
         context = "\n".join([doc.page_content for doc in docs])
 
@@ -137,7 +141,7 @@ def user_input(user_question):
 
 def main():
     st.set_page_config(page_title="Chat PDF")
-    st.header("Chat with your BM Lab💁")
+    st.header("Chat with your BEE Lab🔬🔎")
 
     process_pdfs()
 
