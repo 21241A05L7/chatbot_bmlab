@@ -50,6 +50,28 @@ def process_pdfs():
             get_vector_store(text_chunks)
             st.success("Processing complete and FAISS index created.")
 
+def list_paper_titles(user_question, docs):
+    # Extracting paper titles based on the user question
+    titles = [doc.metadata.get("title", "Untitled") for doc in docs]
+    titles_text = "\n".join(titles)
+    return titles_text
+
+def list_author_papers(author_name, docs):
+    # Extracting paper titles and summaries based on the author name
+    papers = []
+    for doc in docs:
+        if author_name.lower() in doc.page_content.lower():
+            title = doc.metadata.get("title", "Untitled")
+            summary_template = """
+            Provide a summary of the following text:\n\n
+            {text}
+            """
+            summary_chain = get_conversational_chain(summary_template)
+            summary_response = summary_chain({"text": doc.page_content}, return_only_outputs=True)
+            summary = summary_response.get("text", "No summary found")
+            papers.append(f"Title: {title}\nSummary: {summary}\n")
+    return "\n".join(papers)
+
 def user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     
@@ -57,50 +79,62 @@ def user_input(user_question):
     new_db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question)
 
-    # Extracting the context from the documents
-    context = "\n".join([doc.page_content for doc in docs])
+    # Check if the user is asking for a list of paper titles
+    if "list" in user_question.lower() and "titles" in user_question.lower():
+        titles_text = list_paper_titles(user_question, docs)
+        st.write("Paper Titles:\n", titles_text)
+        current_response_text = titles_text
+    # Check if the user is asking about work done by a specific author
+    elif "work done by" in user_question.lower():
+        author_name = user_question.split("work done by")[-1].strip()
+        author_papers_text = list_author_papers(author_name, docs)
+        st.write(f"Papers by {author_name}:\n", author_papers_text)
+        current_response_text = author_papers_text
+    else:
+        # Extracting the context from the documents
+        context = "\n".join([doc.page_content for doc in docs])
 
-    # Handling current context question
-    current_question_template = """
-    Based on the provided context, describe the research that has been conducted on the given topic.\n\n
-    Context:\n {context}?\n
-    Question: \n{question}\n
+        # Handling current context question
+        current_question_template = """
+        Based on the provided context, describe the research that has been conducted on the given topic.\n\n
+        Context:\n {context}?\n
+        Question: \n{question}\n
 
-    Answer:
-    """
-    current_chain = get_conversational_chain(current_question_template)
+        Answer:
+        """
+        current_chain = get_conversational_chain(current_question_template)
 
-    current_response = current_chain(
-        {"context": context, "question": user_question},
-        return_only_outputs=True
-    )
+        current_response = current_chain(
+            {"context": context, "question": user_question},
+            return_only_outputs=True
+        )
 
-    current_response_text = current_response.get("text", "No output text found")
+        current_response_text = current_response.get("text", "No output text found")
 
-    st.write("Reply: \n", current_response_text)
+        st.write("Reply: \n", current_response_text)
 
-    # Handling future prospects based on the same context and question
-    future_question_template = """
-    Based on the provided context and the given question, suggest what can be done in the future regarding the topic. Provide detailed and actionable recommendations.\n\n
-    Context:\n {context}?\n
-    Question: \n{question}\n
+        # Handling future prospects based on the same context and question
+        future_question_template = """
+        Based on the provided context and the given question, suggest what can be done in the future regarding the topic. Provide detailed and actionable recommendations.\n\n
+        Context:\n {context}?\n
+        Question: \n{question}\n
 
-    Future Prospects:
-    """
-    future_chain = get_conversational_chain(future_question_template)
+        Future Prospects:
+        """
+        future_chain = get_conversational_chain(future_question_template)
 
-    future_response = future_chain(
-        {"context": context, "question": user_question},
-        return_only_outputs=True
-    )
+        future_response = future_chain(
+            {"context": context, "question": user_question},
+            return_only_outputs=True
+        )
 
-    future_response_text = future_response.get("text", "No output text found")
+        future_response_text = future_response.get("text", "No output text found")
 
-    st.write("Future Prospects: \n", future_response_text)
+        st.write("Future Prospects: \n", future_response_text)
 
     # Add the current question and response to the chat history if it's a new question
     if 'last_question' not in st.session_state or st.session_state.last_question != user_question:
-        st.session_state.history.append({"question": user_question, "reply": current_response_text, "future": future_response_text})
+        st.session_state.history.append({"question": user_question, "reply": current_response_text})
         st.session_state.last_question = user_question
 
     # Adding copy and share buttons
@@ -140,7 +174,6 @@ def main():
     if 'selected_chat' in st.session_state:
         st.sidebar.write(f"Q: {st.session_state.selected_chat['question']}")
         st.sidebar.write(f"Reply: {st.session_state.selected_chat['reply']}")
-        st.sidebar.write(f"Future Prospects: {st.session_state.selected_chat['future']}")
 
 if __name__ == "__main__":
     main()
