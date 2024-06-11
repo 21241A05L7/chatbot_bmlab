@@ -98,8 +98,10 @@ def user_input(user_question):
 
     st.write("Future Prospects: \n", future_response_text)
 
-    # Add the current question and response to the chat history
-    st.session_state.history.append({"question": user_question, "reply": current_response_text, "future": future_response_text})
+    # Add the current question and response to the chat history if it's a new question
+    if 'last_question' not in st.session_state or st.session_state.last_question != user_question:
+        st.session_state.history.append({"question": user_question, "reply": current_response_text, "future": future_response_text})
+        st.session_state.last_question = user_question
 
     # Adding copy and share buttons
     st.button("Copy Answer", on_click=lambda: st.write("Copy the answer manually due to browser restrictions."))
