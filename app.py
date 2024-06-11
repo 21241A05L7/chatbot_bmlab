@@ -51,13 +51,10 @@ def process_pdfs():
             st.success("Processing complete and FAISS index created.")
 
 def list_paper_titles(docs):
-    # Extracting paper titles based on the user question
     titles = [doc.metadata.get("title", "Untitled") for doc in docs]
-    titles_text = "\n".join(titles)
-    return titles_text
+    return "\n".join(titles)
 
 def list_author_papers(author_name, docs):
-    # Extracting paper titles and summaries based on the author name
     papers = []
     for doc in docs:
         if author_name.lower() in doc.page_content.lower():
@@ -74,27 +71,21 @@ def list_author_papers(author_name, docs):
 
 def user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    
-    # Enable dangerous deserialization explicitly
     new_db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question)
 
-    # Check if the user is asking for a list of paper titles
     if "list" in user_question.lower() and "titles" in user_question.lower():
         titles_text = list_paper_titles(docs)
         st.write("Paper Titles:\n", titles_text)
         current_response_text = titles_text
-    # Check if the user is asking about work done by a specific author
-    elif "work done by" in user_question.lower():
-        author_name = user_question.split("work done by")[-1].strip()
+    elif "contribution" in user_question.lower() or "work by" in user_question.lower():
+        author_name = user_question.split("by")[-1].strip()
         author_papers_text = list_author_papers(author_name, docs)
         st.write(f"Papers by {author_name}:\n", author_papers_text)
         current_response_text = author_papers_text
     else:
-        # Extracting the context from the documents
         context = "\n".join([doc.page_content for doc in docs])
 
-        # Handling current context question
         current_question_template = """
         Based on the provided context, describe the research that has been conducted on the given topic.\n\n
         Context:\n {context}?\n
@@ -113,7 +104,6 @@ def user_input(user_question):
 
         st.write("Reply: \n", current_response_text)
 
-        # Handling future prospects based on the same context and question
         future_question_template = """
         Based on the provided context and the given question, suggest what can be done in the future regarding the topic. Provide detailed and actionable recommendations.\n\n
         Context:\n {context}?\n
@@ -132,16 +122,13 @@ def user_input(user_question):
 
         st.write("Future Prospects: \n", future_response_text)
 
-    # Add the current question and response to the chat history if it's a new question
     if 'last_question' not in st.session_state or st.session_state.last_question != user_question:
         st.session_state.history.append({"question": user_question, "reply": current_response_text})
         st.session_state.last_question = user_question
 
-    # Adding copy and share buttons
     st.button("Copy Answer", on_click=lambda: st.write("Copy the answer manually due to browser restrictions."))
     st.button("Share Answer", on_click=lambda: st.write("Share the answer manually due to browser restrictions."))
 
-    # Feedback buttons side by side with immediate feedback
     feedback_col1, feedback_col2 = st.columns([1, 1])
     if feedback_col1.button("👍"):
         st.write("Thanks for your feedback!")
@@ -152,19 +139,15 @@ def main():
     st.set_page_config(page_title="Chat PDF")
     st.header("Chat with your BM Lab💁")
 
-    # Process PDFs only if the index does not exist
     process_pdfs()
 
-    # Initialize the session state for chat history if not already done
     if 'history' not in st.session_state:
         st.session_state.history = []
 
-    # Main input for user question
     user_question = st.text_input('Ask a Question from the PDF Files\nIn the Format:-Summary on your topic')
     if user_question:
         user_input(user_question)
 
-    # Display chat history
     st.sidebar.subheader("Chat History")
     if st.session_state.history:
         for i, chat in enumerate(reversed(st.session_state.history[-10:])):
