@@ -50,7 +50,7 @@ def process_pdfs():
             get_vector_store(text_chunks)
             st.success("Processing complete and FAISS index created.")
 
-def list_paper_titles(user_question, docs):
+def list_paper_titles(docs):
     # Extracting paper titles based on the user question
     titles = [doc.metadata.get("title", "Untitled") for doc in docs]
     titles_text = "\n".join(titles)
@@ -81,7 +81,7 @@ def user_input(user_question):
 
     # Check if the user is asking for a list of paper titles
     if "list" in user_question.lower() and "titles" in user_question.lower():
-        titles_text = list_paper_titles(user_question, docs)
+        titles_text = list_paper_titles(docs)
         st.write("Paper Titles:\n", titles_text)
         current_response_text = titles_text
     # Check if the user is asking about work done by a specific author
