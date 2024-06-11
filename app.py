@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import LLMChain
+from streamlit.components.v1 import html
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -98,6 +99,28 @@ def user_input(user_question):
 
     st.write("Future Prospects: \n", future_response_text)
 
+    # Adding copy, share, and feedback buttons
+    if st.button("Copy Answer"):
+        html(f"<textarea id='copy-textarea'>{current_response_text}</textarea>"
+             "<button onclick='navigator.clipboard.writeText(document.getElementById(\"copy-textarea\").value)'>Copy to Clipboard</button>")
+    
+    if st.button("Share Answer"):
+        html(f"<textarea id='share-textarea'>{current_response_text}</textarea>"
+             "<button onclick='navigator.clipboard.writeText(document.getElementById(\"share-textarea\").value)'>Share</button>")
+
+    feedback_col1, feedback_col2 = st.columns(2)
+    with feedback_col1:
+        if st.button("👍"):
+            st.write("Thanks for your feedback!")
+    with feedback_col2:
+        if st.button("👎"):
+            st.write("Sorry to hear that. Please provide more feedback.")
+
+    if st.button("Follow-up"):
+        user_question = st.text_input('Follow-up Question:')
+        if user_question:
+            user_input(user_question)
+
 def main():
     st.set_page_config(page_title="Chat PDF")
     st.header("Chat with your BM Lab💁")
@@ -109,6 +132,22 @@ def main():
 
     if user_question:
         user_input(user_question)
+
+    st.sidebar.subheader("Chat History")
+    chat_history = st.sidebar.empty()
+
+    # Maintaining chat history in session state
+    if 'history' not in st.session_state:
+        st.session_state.history = []
+
+    # Dropdown for the last 10 chat history
+    if len(st.session_state.history) > 10:
+        st.session_state.history = st.session_state.history[-10:]
+
+    selected_chat = st.sidebar.selectbox("Select a conversation", options=st.session_state.history)
+
+    if selected_chat:
+        st.sidebar.write(selected_chat)
 
 if __name__ == "__main__":
     main()
