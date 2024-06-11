@@ -105,14 +105,12 @@ def user_input(user_question):
     st.button("Copy Answer", on_click=lambda: st.write("Copy the answer manually due to browser restrictions."))
     st.button("Share Answer", on_click=lambda: st.write("Share the answer manually due to browser restrictions."))
 
-    # Feedback buttons side by side
+    # Feedback buttons side by side with immediate feedback
     feedback_col1, feedback_col2 = st.columns([1, 1])
-    with feedback_col1:
-        if st.button("👍"):
-            st.write("Thanks for your feedback!")
-    with feedback_col2:
-        if st.button("👎"):
-            st.write("Sorry to hear that. Please provide more feedback.")
+    if feedback_col1.button("👍"):
+        st.write("Thanks for your feedback!")
+    if feedback_col2.button("👎"):
+        st.write("Sorry to hear that. Please provide more feedback.")
 
 def main():
     st.set_page_config(page_title="Chat PDF")
@@ -135,9 +133,12 @@ def main():
     if st.session_state.history:
         for i, chat in enumerate(reversed(st.session_state.history[-10:])):
             if st.sidebar.button(f"Topic {i+1}: {chat['question']}", key=f"history_button_{i}"):
-                st.sidebar.write(f"Q: {chat['question']}")
-                st.sidebar.write(f"Reply: {chat['reply']}")
-                st.sidebar.write(f"Future Prospects: {chat['future']}")
+                st.session_state.selected_chat = chat
+
+    if 'selected_chat' in st.session_state:
+        st.sidebar.write(f"Q: {st.session_state.selected_chat['question']}")
+        st.sidebar.write(f"Reply: {st.session_state.selected_chat['reply']}")
+        st.sidebar.write(f"Future Prospects: {st.session_state.selected_chat['future']}")
 
 if __name__ == "__main__":
     main()
