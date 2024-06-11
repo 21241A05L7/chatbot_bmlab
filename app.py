@@ -62,7 +62,7 @@ def user_input(user_question):
 
     # Handling current context question
     current_question_template = """
-    Based on the provided context, describe the research that has been conducted on the given topic by changing the question to your understandable way so that you can search easily but provide the result for sure.\n\n
+    Based on the provided context, describe the research that has been conducted on the given topic.\n\n
     Context:\n {context}?\n
     Question: \n{question}\n
 
@@ -77,7 +77,7 @@ def user_input(user_question):
 
     current_response_text = current_response.get("text", "No output text found")
 
-    st.write("Reply: \n ", current_response_text)
+    st.write("Reply: \n", current_response_text)
 
     # Handling future prospects based on the same context and question
     future_question_template = """
@@ -98,17 +98,14 @@ def user_input(user_question):
 
     st.write("Future Prospects: \n", future_response_text)
 
-    # Adding copy, share, and feedback buttons
-    st.markdown(f"""
-    <textarea id='copy-textarea' style='position: absolute; left: -9999px;'>{current_response_text}</textarea>
-    <button onclick="document.getElementById('copy-textarea').select(); document.execCommand('copy'); alert('Copied to clipboard!');">Copy Answer</button>
-    """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <textarea id='share-textarea' style='position: absolute; left: -9999px;'>{current_response_text}</textarea>
-    <button onclick="document.getElementById('share-textarea').select(); document.execCommand('copy'); alert('Copied to clipboard!');">Share Answer</button>
-    """, unsafe_allow_html=True)
+    # Add the current question and response to the chat history
+    st.session_state.history.append({"question": user_question, "reply": current_response_text, "future": future_response_text})
 
+    # Adding copy and share buttons
+    st.button("Copy Answer", on_click=lambda: st.write("Copy the answer manually due to browser restrictions."))
+    st.button("Share Answer", on_click=lambda: st.write("Share the answer manually due to browser restrictions."))
+
+    # Feedback buttons
     feedback_col1, feedback_col2 = st.columns(2)
     with feedback_col1:
         if st.button("👍"):
@@ -117,42 +114,34 @@ def user_input(user_question):
         if st.button("👎"):
             st.write("Sorry to hear that. Please provide more feedback.")
 
-    if st.button("Follow-up"):
-        followup_question = st.text_input('Follow-up Question:')
-        if followup_question:
-            user_input(followup_question)
+    # Follow-up question input
+    followup_question = st.text_input('Follow-up Question:')
+    if followup_question:
+        user_input(followup_question)
 
 def main():
     st.set_page_config(page_title="Chat PDF")
     st.header("Chat with your BM Lab💁")
 
+    # Process PDFs only if the index does not exist
     process_pdfs()
 
-    user_question = st.text_input('''Ask a Question from the PDF Files\n
-    In the Format:-Summary on your topic''')
-
-    if user_question:
-        user_input(user_question)
-
-    st.sidebar.subheader("Chat History")
-    chat_history = st.sidebar.empty()
-
-    # Maintaining chat history in session state
+    # Initialize the session state for chat history if not already done
     if 'history' not in st.session_state:
         st.session_state.history = []
 
-    # Append current user question to history
-    if user_question and user_question not in st.session_state.history:
-        st.session_state.history.append(user_question)
+    # Display chat history
+    st.sidebar.subheader("Chat History")
+    chat_history = st.sidebar.empty()
+    for i, chat in enumerate(st.session_state.history):
+        st.sidebar.write(f"Q{i+1}: {chat['question']}")
+        st.sidebar.write(f"Reply: {chat['reply']}")
+        st.sidebar.write(f"Future Prospects: {chat['future']}")
 
-    # Dropdown for the last 10 chat history
-    if len(st.session_state.history) > 10:
-        st.session_state.history = st.session_state.history[-10:]
-
-    selected_chat = st.sidebar.selectbox("Select a conversation", options=st.session_state.history)
-
-    if selected_chat:
-        st.sidebar.write(selected_chat)
+    # Main input for user question
+    user_question = st.text_input('Ask a Question from the PDF Files\nIn the Format:-Summary on your topic')
+    if user_question:
+        user_input(user_question)
 
 if __name__ == "__main__":
     main()
