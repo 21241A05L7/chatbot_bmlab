@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import LLMChain
-from streamlit.components.v1 import html
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -100,13 +99,15 @@ def user_input(user_question):
     st.write("Future Prospects: \n", future_response_text)
 
     # Adding copy, share, and feedback buttons
-    if st.button("Copy Answer"):
-        html(f"<textarea id='copy-textarea'>{current_response_text}</textarea>"
-             "<button onclick='navigator.clipboard.writeText(document.getElementById(\"copy-textarea\").value)'>Copy to Clipboard</button>")
+    st.markdown(f"""
+    <textarea id='copy-textarea' style='position: absolute; left: -9999px;'>{current_response_text}</textarea>
+    <button onclick="document.getElementById('copy-textarea').select(); document.execCommand('copy'); alert('Copied to clipboard!');">Copy Answer</button>
+    """, unsafe_allow_html=True)
     
-    if st.button("Share Answer"):
-        html(f"<textarea id='share-textarea'>{current_response_text}</textarea>"
-             "<button onclick='navigator.clipboard.writeText(document.getElementById(\"share-textarea\").value)'>Share</button>")
+    st.markdown(f"""
+    <textarea id='share-textarea' style='position: absolute; left: -9999px;'>{current_response_text}</textarea>
+    <button onclick="document.getElementById('share-textarea').select(); document.execCommand('copy'); alert('Copied to clipboard!');">Share Answer</button>
+    """, unsafe_allow_html=True)
 
     feedback_col1, feedback_col2 = st.columns(2)
     with feedback_col1:
@@ -117,9 +118,9 @@ def user_input(user_question):
             st.write("Sorry to hear that. Please provide more feedback.")
 
     if st.button("Follow-up"):
-        user_question = st.text_input('Follow-up Question:')
-        if user_question:
-            user_input(user_question)
+        followup_question = st.text_input('Follow-up Question:')
+        if followup_question:
+            user_input(followup_question)
 
 def main():
     st.set_page_config(page_title="Chat PDF")
@@ -139,6 +140,10 @@ def main():
     # Maintaining chat history in session state
     if 'history' not in st.session_state:
         st.session_state.history = []
+
+    # Append current user question to history
+    if user_question and user_question not in st.session_state.history:
+        st.session_state.history.append(user_question)
 
     # Dropdown for the last 10 chat history
     if len(st.session_state.history) > 10:
