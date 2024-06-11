@@ -1,72 +1,9 @@
-import streamlit as st
-from PyPDF2 import PdfReader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-import os
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-import google.generativeai as genai
-from langchain_community.vectorstores import FAISS
-from dotenv import load_dotenv
-from langchain.prompts import PromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.chains import LLMChain
-
-load_dotenv()
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-PDF_FOLDER_PATH = r"publications"  # Specify the path to your folder with PDFs
-FAISS_INDEX_PATH = "faiss_index"
-
-def get_pdf_text_from_folder(folder_path):
-    text = ""
-    for filename in os.listdir(folder_path):
-        if filename.endswith(".pdf"):
-            pdf_path = os.path.join(folder_path, filename)
-            pdf_reader = PdfReader(pdf_path)
-            for page in pdf_reader.pages:
-                text += page.extract_text()
-    return text
-
-def get_text_chunks(text):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
-    chunks = text_splitter.split_text(text)
-    return chunks
-
-def get_vector_store(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
-    vector_store.save_local(FAISS_INDEX_PATH)
-
-def get_conversational_chain(template):
-    model = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.3)
-    prompt = PromptTemplate(template=template, input_variables=["context", "question"])
-    chain = LLMChain(llm=model, prompt=prompt)
-    return chain
-
-def process_pdfs():
-    if not os.path.exists(FAISS_INDEX_PATH):
-        with st.spinner("Processing PDFs..."):
-            raw_text = get_pdf_text_from_folder(PDF_FOLDER_PATH)
-            text_chunks = get_text_chunks(raw_text)
-            get_vector_store(text_chunks)
-            st.success("Processing complete and FAISS index created.")
-
-def list_paper_titles(docs):
-    titles = [doc.metadata.get("title", "Untitled") for doc in docs]
-    return "\n".join(titles)
-
 def list_author_papers(author_name, docs):
     papers = []
     for doc in docs:
         if author_name.lower() in doc.page_content.lower():
-            title = doc.metadata.get("title", "Untitled")
-            summary_template = """
-            Provide a summary of the following text:\n\n
-            {text}
-            """
-            summary_chain = get_conversational_chain(summary_template)
-            summary_response = summary_chain({"text": doc.page_content}, return_only_outputs=True)
-            summary = summary_response.get("text", "No summary found")
-            papers.append(f"Title: {title}\nSummary: {summary}\n")
+            title = doc.metadata.get("title") if doc.metadata and "title" in doc.metadata else "Untitled"
+            papers.append(title)
     return "\n".join(papers)
 
 def user_input(user_question):
@@ -76,14 +13,10 @@ def user_input(user_question):
 
     if "contribution" in user_question.lower() or "work by" in user_question.lower():
         author_name = user_question.split("by")[-1].strip()
-        titles = []
-        for doc in docs:
-            if author_name.lower() in doc.page_content.lower():
-                title = doc.metadata.get("title", "Untitled")
-                titles.append(title)
+        titles = list_author_papers(author_name, docs)
         if titles:
-            st.write(f"Papers by {author_name}:\n" + "\n".join(titles))
-            current_response_text = "\n".join(titles)
+            st.write(f"Papers by {author_name}:\n" + titles)
+            current_response_text = titles
         else:
             st.write(f"No papers found by {author_name}.")
             current_response_text = f"No papers found by {author_name}."
@@ -141,7 +74,7 @@ def user_input(user_question):
 
 def main():
     st.set_page_config(page_title="Chat PDF")
-    st.header("Chat with your BEE Lab🔬🔎")
+    st.header("Chat with your BM Lab💁")
 
     process_pdfs()
 
