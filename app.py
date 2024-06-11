@@ -105,19 +105,14 @@ def user_input(user_question):
     st.button("Copy Answer", on_click=lambda: st.write("Copy the answer manually due to browser restrictions."))
     st.button("Share Answer", on_click=lambda: st.write("Share the answer manually due to browser restrictions."))
 
-    # Feedback buttons
-    feedback_col1, feedback_col2 = st.columns(2)
+    # Feedback buttons side by side
+    feedback_col1, feedback_col2 = st.columns([1, 1])
     with feedback_col1:
         if st.button("👍"):
             st.write("Thanks for your feedback!")
     with feedback_col2:
         if st.button("👎"):
             st.write("Sorry to hear that. Please provide more feedback.")
-
-    # Follow-up question input
-    followup_question = st.text_input('Follow-up Question:')
-    if followup_question:
-        user_input(followup_question)
 
 def main():
     st.set_page_config(page_title="Chat PDF")
@@ -130,18 +125,19 @@ def main():
     if 'history' not in st.session_state:
         st.session_state.history = []
 
-    # Display chat history
-    st.sidebar.subheader("Chat History")
-    chat_history = st.sidebar.empty()
-    for i, chat in enumerate(st.session_state.history):
-        st.sidebar.write(f"Q{i+1}: {chat['question']}")
-        st.sidebar.write(f"Reply: {chat['reply']}")
-        st.sidebar.write(f"Future Prospects: {chat['future']}")
-
     # Main input for user question
     user_question = st.text_input('Ask a Question from the PDF Files\nIn the Format:-Summary on your topic')
     if user_question:
         user_input(user_question)
+
+    # Display chat history
+    st.sidebar.subheader("Chat History")
+    if st.session_state.history:
+        for i, chat in enumerate(reversed(st.session_state.history[-10:])):
+            if st.sidebar.button(f"Topic {i+1}: {chat['question']}", key=f"history_button_{i}"):
+                st.sidebar.write(f"Q: {chat['question']}")
+                st.sidebar.write(f"Reply: {chat['reply']}")
+                st.sidebar.write(f"Future Prospects: {chat['future']}")
 
 if __name__ == "__main__":
     main()
