@@ -69,60 +69,75 @@ def list_author_papers(author_name, docs):
             papers.append(f"Title: {title}\nSummary: {summary}\n")
     return "\n".join(papers)
 
+def list_pdf_files_with_keyword(folder_path, keyword):
+    pdf_files = [filename for filename in os.listdir(folder_path) if filename.endswith(".pdf") and keyword.lower() in filename.lower()]
+    return pdf_files
+
 def user_input(user_question):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    new_db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
-    docs = new_db.similarity_search(user_question)
-
-    if "list" in user_question.lower() and "titles" in user_question.lower():
-        titles_text = list_paper_titles(docs)
-        st.write("Paper Titles:\n", titles_text)
-        current_response_text = titles_text
-    elif "contribution" in user_question.lower() or "work by" in user_question.lower():
-        author_name = user_question.split("by")[-1].strip()
-        author_papers_text = list_author_papers(author_name, docs)
-        st.write(f"Papers by {author_name}:\n", author_papers_text)
-        current_response_text = author_papers_text
+    if "list" in user_question.lower() and "papers on" in user_question.lower():
+        keyword = user_question.split("list papers on")[-1].strip()
+        pdf_files = list_pdf_files_with_keyword(PDF_FOLDER_PATH, keyword)
+        if pdf_files:
+            pdf_files_text = "\n".join(f"{i+1}. {pdf}" for i, pdf in enumerate(pdf_files))
+            st.write("Matching PDF Files:\n", pdf_files_text)
+            current_response_text = pdf_files_text
+        else:
+            st.write("No matching PDF files found.")
+            current_response_text = "No matching PDF files found."
     else:
-        context = "\n".join([doc.page_content for doc in docs])
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        new_db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
+        docs = new_db.similarity_search(user_question)
 
-        current_question_template = """
-        Based on the provided context, describe the research that has been conducted on the given topic.\n\n
-        Context:\n {context}?\n
-        Question: \n{question}\n
+        if "list" in user_question.lower() and "titles" in user_question.lower():
+            titles_text = list_paper_titles(docs)
+            st.write("Paper Titles:\n", titles_text)
+            current_response_text = titles_text
+        elif "contribution" in user_question.lower() or "work by" in user_question.lower():
+            author_name = user_question.split("by")[-1].strip()
+            author_papers_text = list_author_papers(author_name, docs)
+            st.write(f"Papers by {author_name}:\n", author_papers_text)
+            current_response_text = author_papers_text
+        else:
+            context = "\n".join([doc.page_content for doc in docs])
 
-        Answer:
-        """
-        current_chain = get_conversational_chain(current_question_template)
+            current_question_template = """
+            Based on the provided context, describe the research that has been conducted on the given topic.\n\n
+            Context:\n {context}?\n
+            Question: \n{question}\n
 
-        current_response = current_chain(
-            {"context": context, "question": user_question},
-            return_only_outputs=True
-        )
+            Answer:
+            """
+            current_chain = get_conversational_chain(current_question_template)
 
-        current_response_text = current_response.get("text", "No output text found")
+            current_response = current_chain(
+                {"context": context, "question": user_question},
+                return_only_outputs=True
+            )
 
-        st.markdown("**Reply:**")
-        st.write("\n", current_response_text)
+            current_response_text = current_response.get("text", "No output text found")
 
-        future_question_template = """
-        Based on the provided context and the given question, suggest what can be done in the future regarding the topic. Provide detailed and actionable recommendations.\n\n
-        Context:\n {context}?\n
-        Question: \n{question}\n
+            st.markdown("**Reply:**")
+            st.write("\n", current_response_text)
 
-        Future Prospects:
-        """
-        future_chain = get_conversational_chain(future_question_template)
+            future_question_template = """
+            Based on the provided context and the given question, suggest what can be done in the future regarding the topic. Provide detailed and actionable recommendations.\n\n
+            Context:\n {context}?\n
+            Question: \n{question}\n
 
-        future_response = future_chain(
-            {"context": context, "question": user_question},
-            return_only_outputs=True
-        )
+            Future Prospects:
+            """
+            future_chain = get_conversational_chain(future_question_template)
 
-        future_response_text = future_response.get("text", "No output text found")
+            future_response = future_chain(
+                {"context": context, "question": user_question},
+                return_only_outputs=True
+            )
 
-        st.markdown("**Future Prospects:**")
-        st.write("\n", future_response_text)
+            future_response_text = future_response.get("text", "No output text found")
+
+            st.markdown("**Future Prospects:**")
+            st.write("\n", future_response_text)
 
     if 'last_question' not in st.session_state or st.session_state.last_question != user_question:
         st.session_state.history.append({"question": user_question, "reply": current_response_text})
