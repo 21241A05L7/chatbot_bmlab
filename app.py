@@ -73,6 +73,19 @@ def list_pdf_files_with_keyword(folder_path, keyword):
     pdf_files = [filename for filename in os.listdir(folder_path) if filename.endswith(".pdf") and keyword.lower() in filename.lower()]
     return pdf_files
 
+def list_pdf_files_by_author(folder_path, author_name):
+    pdf_files = []
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".pdf"):
+            pdf_path = os.path.join(folder_path, filename)
+            pdf_reader = PdfReader(pdf_path)
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text()
+            if author_name.lower() in text.lower():
+                pdf_files.append(filename)
+    return pdf_files
+
 def user_input(user_question):
     if "list" in user_question.lower() and "papers on" in user_question.lower():
         keyword = user_question.split("list papers on")[-1].strip()
@@ -84,6 +97,16 @@ def user_input(user_question):
         else:
             st.write("No matching PDF files found.")
             current_response_text = "No matching PDF files found."
+    elif "what work" in user_question.lower() or "contributions done by" in user_question.lower():
+        author_name = user_question.split("by")[-1].strip()
+        pdf_files = list_pdf_files_by_author(PDF_FOLDER_PATH, author_name)
+        if pdf_files:
+            pdf_files_text = "\n".join(f"{i+1}. {pdf}" for i, pdf in enumerate(pdf_files))
+            st.write(f"Papers by {author_name}:\n", pdf_files_text)
+            current_response_text = pdf_files_text
+        else:
+            st.write(f"No papers found for author {author_name}.")
+            current_response_text = f"No papers found for author {author_name}."
     else:
         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
         new_db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
@@ -176,3 +199,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
