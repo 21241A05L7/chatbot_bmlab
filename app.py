@@ -102,7 +102,8 @@ def user_input(user_question):
 
         current_response_text = current_response.get("text", "No output text found")
 
-        st.write("Reply: \n", current_response_text)
+        st.markdown("**Reply:**")
+        st.write("\n", current_response_text)
 
         future_question_template = """
         Based on the provided context and the given question, suggest what can be done in the future regarding the topic. Provide detailed and actionable recommendations.\n\n
@@ -120,24 +121,24 @@ def user_input(user_question):
 
         future_response_text = future_response.get("text", "No output text found")
 
-        st.write("Future Prospects: \n", future_response_text)
+        st.markdown("**Future Prospects:**")
+        st.write("\n", future_response_text)
 
     if 'last_question' not in st.session_state or st.session_state.last_question != user_question:
         st.session_state.history.append({"question": user_question, "reply": current_response_text})
         st.session_state.last_question = user_question
 
-    st.button("Copy Answer", on_click=lambda: st.write("Copy the answer manually due to browser restrictions."))
-    st.button("Share Answer", on_click=lambda: st.write("Share the answer manually due to browser restrictions."))
-
-    feedback_col1, feedback_col2 = st.columns([1, 1])
-    if feedback_col1.button("👍"):
+    feedback_col1, feedback_col2, feedback_col3 = st.columns([1, 1, 8])
+    feedback_col3.write("Provide feedback:")
+    feedback_col4, feedback_col5 = st.columns([1, 1])
+    if feedback_col4.button("👍"):
         st.write("Thanks for your feedback!")
-    if feedback_col2.button("👎"):
-        st.write("Sorry to hear that. Please provide more feedback.")
+    if feedback_col5.button("👎"):
+        st.write("Sorry to hear that.")
 
 def main():
     st.set_page_config(page_title="Chat PDF")
-    st.header("Chat with your BM Lab💁")
+    st.header("Chat with your BEE Lab🔍📝")
 
     process_pdfs()
 
