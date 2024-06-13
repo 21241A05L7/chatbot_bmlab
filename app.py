@@ -183,7 +183,7 @@ def main():
     if 'history' not in st.session_state:
         st.session_state.history = []
 
-    user_question = st.text_input('Ask a Question from the PDF Files\nIn the Format:-Summary on your topic')
+    user_question = st.text_input('Cheers ! Let's dive in and quench our thirst through chatting by asking a question with me')
     if user_question:
         user_input(user_question)
 
