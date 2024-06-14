@@ -68,7 +68,11 @@ def process_pdfs():
                 f.write(new_checksum)
             st.success("Processing complete and FAISS index updated.")
     else:
-        st.info("")
+        st.info("""Welcome to the BEE Lab chatbot! As an AI assistant, I'm here to help you with any questions or tasks related to the research and activities of the BEE Lab.
+
+My knowledge base covers a wide range of information about the BEE Lab since its inception in 2014. Feel free to ask me specific queries or more open-ended questions - I'll do my best to provide helpful and accurate responses.
+
+How can I assist you today? I'm ready to put my knowledge and capabilities to work for you.""")
 
 def list_paper_titles(docs):
     titles = [doc.metadata.get("title", "Untitled") for doc in docs]
