@@ -2,6 +2,7 @@ import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
+import hashlib
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import google.generativeai as genai
 from langchain_community.vectorstores import FAISS
@@ -18,6 +19,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 PDF_FOLDER_PATH = r"publications"  # Specify the path to your folder with PDFs
 FAISS_INDEX_PATH = "faiss_index"
+CHECKSUM_FILE_PATH = "checksum.txt"
 
 def get_pdf_text_from_folder(folder_path):
     text = ""
@@ -45,13 +47,28 @@ def get_conversational_chain(template):
     chain = LLMChain(llm=model, prompt=prompt)
     return chain
 
+def calculate_checksum(folder_path):
+    hasher = hashlib.md5()
+    for filename in sorted(os.listdir(folder_path)):
+        if filename.endswith(".pdf"):
+            file_path = os.path.join(folder_path, filename)
+            with open(file_path, 'rb') as f:
+                buf = f.read()
+                hasher.update(buf)
+    return hasher.hexdigest()
+
 def process_pdfs():
-    if not os.path.exists(FAISS_INDEX_PATH):
+    new_checksum = calculate_checksum(PDF_FOLDER_PATH)
+    if not os.path.exists(FAISS_INDEX_PATH) or (os.path.exists(CHECKSUM_FILE_PATH) and open(CHECKSUM_FILE_PATH).read() != new_checksum):
         with st.spinner("Processing PDFs..."):
             raw_text = get_pdf_text_from_folder(PDF_FOLDER_PATH)
             text_chunks = get_text_chunks(raw_text)
             get_vector_store(text_chunks)
-            st.success("Processing complete and FAISS index created.")
+            with open(CHECKSUM_FILE_PATH, 'w') as f:
+                f.write(new_checksum)
+            st.success("Processing complete and FAISS index updated.")
+    else:
+        st.info("")
 
 def list_paper_titles(docs):
     titles = [doc.metadata.get("title", "Untitled") for doc in docs]
