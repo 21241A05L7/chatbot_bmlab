@@ -235,10 +235,10 @@ st.markdown(
             transform: translateX(-50%);
         }
         .fixed-text-2 {
-            bottom: 40px; /* Positioned above the first text */
+            bottom: 50px; /* Positioned above the first text */
         }
         .fixed-text-3 {
-            bottom: 30px; /* Positioned above the second text */
+            bottom: 40px; /* Positioned above the second text */
         }
     </style>
     <div class="fixed-text fixed-text-1">@2024 by BEE Lab,BM Dept., NIT Rourkela</div>
