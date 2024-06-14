@@ -10,6 +10,9 @@ from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import LLMChain
 
+# Set page config at the very beginning
+st.set_page_config(page_title="Chat PDF")
+
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
@@ -175,7 +178,6 @@ def user_input(user_question):
         st.write("Sorry to hear that.")
 
 def main():
-    st.set_page_config(page_title="Chat PDF")
     st.header("Chat with your BEE Lab, BM Dept, NIT Rourkela🔍📝")
 
     process_pdfs()
