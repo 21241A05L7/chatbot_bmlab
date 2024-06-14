@@ -68,11 +68,7 @@ def process_pdfs():
                 f.write(new_checksum)
             st.success("Processing complete and FAISS index updated.")
     else:
-        st.info("""Welcome to the BEE Lab chatbot! As an AI assistant, I'm here to help you with any questions or tasks related to the research and activities of the BEE Lab.
-
-My knowledge base covers a wide range of information about the BEE Lab since its inception in 2014. Feel free to ask me specific queries or more open-ended questions - I'll do my best to provide helpful and accurate responses.
-
-How can I assist you today? I'm ready to put my knowledge and capabilities to work for you.""")
+        st.info("")
 
 def list_paper_titles(docs):
     titles = [doc.metadata.get("title", "Untitled") for doc in docs]
@@ -206,7 +202,11 @@ def main():
     if 'history' not in st.session_state:
         st.session_state.history = []
 
-    user_question = st.text_input('Cheers ! Let us dive in and quench our thirst through chatting by asking a question with me')
+    user_question = st.text_input("""Welcome to the BEE Lab chatbot! As an AI assistant, I'm here to help you with any questions or tasks related to the research and activities of the BEE Lab.
+
+My knowledge base covers a wide range of information about the BEE Lab since its inception in 2014. Feel free to ask me specific queries or more open-ended questions - I'll do my best to provide helpful and accurate responses.
+
+How can I assist you today? I'm ready to put my knowledge and capabilities to work for you.""")
     if user_question:
         user_input(user_question)
 
