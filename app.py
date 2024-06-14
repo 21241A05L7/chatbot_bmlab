@@ -235,7 +235,7 @@ st.markdown(
             transform: translateX(-50%);
         }
         .fixed-text-2 {
-            bottom: 20px; /* Positioned above the first text */
+            bottom: 40px; /* Positioned above the first text */
         }
         .fixed-text-3 {
             bottom: 30px; /* Positioned above the second text */
