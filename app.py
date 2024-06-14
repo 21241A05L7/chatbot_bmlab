@@ -67,9 +67,7 @@ def process_pdfs():
             with open(CHECKSUM_FILE_PATH, 'w') as f:
                 f.write(new_checksum)
             st.success("Processing complete and FAISS index updated.")
-    else:
-        st.info("")
-
+            
 def list_paper_titles(docs):
     titles = [doc.metadata.get("title", "Untitled") for doc in docs]
     return "\n".join(titles)
