@@ -196,7 +196,36 @@ def main():
     if 'selected_chat' in st.session_state:
         st.sidebar.write(f"Q: {st.session_state.selected_chat['question']}")
         st.sidebar.write(f"Reply: {st.session_state.selected_chat['reply']}")
+st.markdown(
+            """
+            <style>
+        .fixed-text {
+            position: fixed;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        .fixed-text-1 {
+            bottom: 10px; /* Positioned in the middle bottom */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .fixed-text-2 {
+            bottom: 10px; /* Positioned above the first text */
+        }
+        .fixed-text-3 {
+            bottom: 0px; /* Positioned above the second text */
+        }
+    </style>
+    <div class="fixed-text fixed-text-1">@2024 by Bio-Energy and Environment Lab, NIT Rourkela</div>
+    <div class="fixed-text fixed-text-2">Developed by Nithin Reddy</div>
+    <div class="fixed-text fixed-text-3">Reach me @7981985670</div>
 
+            """,
+            unsafe_allow_html=True
+        )
 if __name__ == "__main__":
     main()
-
