@@ -235,15 +235,15 @@ st.markdown(
             transform: translateX(-50%);
         }
         .fixed-text-2 {
-            top: 50px; /* Positioned above the first text */
+            bottom: 20px; /* Positioned above the first text */
         }
         .fixed-text-3 {
-            top: 60px; /* Positioned above the second text */
+            bottom: 30px; /* Positioned above the second text */
         }
     </style>
-    <div class="fixed-text fixed-text-1">@2024 by Bio-Energy and Environment Lab, NIT Rourkela</div>
+    <div class="fixed-text fixed-text-1">@2024 by BEE Lab,BM Dept., NIT Rourkela</div>
     <div class="fixed-text fixed-text-2">Developed by Nithin Reddy</div>
-    <div class="fixed-text fixed-text-3">Reach me @7981985670</div>
+    <div class="fixed-text fixed-text-3">Mail: chnani020@gmail.com</div>
 
             """,
             unsafe_allow_html=True
