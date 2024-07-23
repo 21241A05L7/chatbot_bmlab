@@ -241,7 +241,7 @@ st.markdown(
             bottom: 50px; /* Positioned above the second text */
         }
     </style>
-    <div class="fixed-text fixed-text-1">@2024 by Bio-Energy and Environment Lab, NIT Rourkela</div>
+    <div class="fixed-text fixed-text-1">@2024 by BEE Lab,BM Dept., NIT Rourkela</div>
     <div class="fixed-text fixed-text-2">Developed by Nithin Reddy</div>
     <div class="fixed-text fixed-text-3">Reach me @7981985670</div>
 
