@@ -193,7 +193,7 @@ def user_input(user_question):
         st.write("Sorry to hear that.")
 
 def main():
-    st.header("Chat with your Lab, BioMedical Dept, NIT Rourkela🔍📝")
+    st.header("Chat with your BEE Lab, BM Dept, NIT Rourkela🔍📝")
 
     process_pdfs()
 
@@ -235,19 +235,18 @@ st.markdown(
             transform: translateX(-50%);
         }
         .fixed-text-2 {
-            bottom: 50px; /* Positioned above the first text */
+            top: 50px; /* Positioned above the first text */
         }
         .fixed-text-3 {
-            bottom: 40px; /* Positioned above the second text */
+            top: 60px; /* Positioned above the second text */
         }
     </style>
-    <div class="fixed-text fixed-text-1">@2024 for Lab,BioMedical Dept., NIT Rourkela</div>
-    <div class="fixed-text fixed-text-2">Developed by Gunesh Nagothi</div>
-    <div class="fixed-text fixed-text-3">Mail: nagothigunesh@gmail.com</div>
+    <div class="fixed-text fixed-text-1">@2024 by Bio-Energy and Environment Lab, NIT Rourkela</div>
+    <div class="fixed-text fixed-text-2">Developed by Nithin Reddy</div>
+    <div class="fixed-text fixed-text-3">Reach me @7981985670</div>
 
             """,
             unsafe_allow_html=True
         )
 if __name__ == "__main__":
     main()
-
