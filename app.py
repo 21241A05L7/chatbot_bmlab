@@ -193,7 +193,7 @@ def user_input(user_question):
         st.write("Sorry to hear that.")
 
 def main():
-    st.header("Chat with your BEE Lab, BM Dept, NIT Rourkela🔍📝")
+    st.header("Chat with your Lab, BioMedical Dept, NIT Rourkela🔍📝")
 
     process_pdfs()
 
@@ -241,9 +241,9 @@ st.markdown(
             bottom: 40px; /* Positioned above the second text */
         }
     </style>
-    <div class="fixed-text fixed-text-1">@2024 by BEE Lab,BM Dept., NIT Rourkela</div>
-    <div class="fixed-text fixed-text-2">Developed by Nithin Reddy</div>
-    <div class="fixed-text fixed-text-3">Mail: chnani020@gmail.com</div>
+    <div class="fixed-text fixed-text-1">@2024 for Lab,BioMedical Dept., NIT Rourkela</div>
+    <div class="fixed-text fixed-text-2">Developed by Gunesh Nagothi</div>
+    <div class="fixed-text fixed-text-3">Mail: nagothigunesh@gmail.com</div>
 
             """,
             unsafe_allow_html=True
